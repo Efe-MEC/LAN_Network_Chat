@@ -23,8 +23,8 @@ while True:
     data, addr = sock.recvfrom(1024)
     message = json.loads(data.decode())
     
-    ip = addr[0]
     name = message["name"]
+    ip = message["ip"]
     time_now = time.time()
     
     ips[ip] = {
