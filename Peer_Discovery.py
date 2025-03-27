@@ -21,10 +21,10 @@ print(f"Listening on port {broadcast_port}")
 while True:
     
     data, addr = sock.recvfrom(1024)
+    ip = addr[0]
     message = json.loads(data.decode())
     
     name = message["name"]
-    ip = message["ip"]
     time_now = time.time()
     
     ips[ip] = {
@@ -34,3 +34,5 @@ while True:
     
     with open(ip_file, "w") as f:
         json.dump(ips, f, indent=4)
+    
+    print(f"{name} is online on ({ip})")

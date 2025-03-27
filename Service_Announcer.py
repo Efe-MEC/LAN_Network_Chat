@@ -8,7 +8,6 @@ my_ip = socket.gethostbyname(socket.gethostname())
 
 message_data = {
     "name": user_name,
-	"ip": my_ip,
 }
 message_json = json.dumps(message_data)
 
