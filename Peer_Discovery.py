@@ -3,7 +3,7 @@ import json
 import os
 import time
 
-ip_file = "ip.json"
+ip_file = "ips.json"
 
 if os.path.exists(ip_file):
     with open(ip_file, "r") as f:

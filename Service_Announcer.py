@@ -2,7 +2,7 @@ import socket
 import json
 import time
 
-user_name = input("Enter your device name: ")
+user_name = input("Enter your username: ")
 
 my_ip = socket.gethostbyname(socket.gethostname())
 
