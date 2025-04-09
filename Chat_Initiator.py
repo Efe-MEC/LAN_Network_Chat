@@ -2,9 +2,7 @@ import socket
 import json
 import os
 import time
-from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-from cryptography.hazmat.primitives import hashes
+import pyDes
 import base64
 
 ip_file = "ips.json"
@@ -30,58 +28,44 @@ def load_users():
 
 def save_log():
 	print(f"Saving log...")
-	
 
-
-def fernet_key(key):
-	
-	hkdf = HKDF(
-		algorithm=hashes.SHA256(),
-		length=32,
-		salt=None,
-		info=None,
-	)
-
-	key_hdkf = hkdf.derive(str(key).encode())
-
-	fernet_key = base64.urlsafe_b64encode(key_hdkf)
-	fernet = Fernet(fernet_key)
-	return fernet
 
 def secure_chat(ip):
 
 	print(f"Secure chat selected.")
 	private_nbr = input("Please enter the encrypted key number (3 digit) :  \n")
 
-	enc_nbr = (g ** int(private_nbr)) % p
+	pub_nbr = (g ** int(private_nbr)) % p
 
 	try:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock.connect((ip, socket_number))
 
 		message_key = {
-    	"key": enc_nbr,
+    	"key": pub_nbr,
     	}
 
-		message_json = json.dumps(message_key)
-		sock.send(json.dumps(message_json).encode())
+		sock.send(json.dumps(message_key).encode())
 
-		print(f"My public key sent: {enc_nbr}, waiting for response key...")
+		print(f"My public key sent: {pub_nbr}, waiting for response key...")
 		data = sock.recv(1024).decode()
+
 		peer_public_key = int(json.loads(data)["key"])
 		print(f"Peer public key received: {peer_public_key}")
 		peer_common_key = (peer_public_key ** int(private_nbr)) % p
 		print(f"Peer common key calculated: {peer_common_key}")
 
-		fernet = fernet_key(peer_common_key)
 		message = input("Please enter your message:\n")
 
-		encrypted_message = fernet.encrypt(message.encode()).decode()
+		encrypted_message = pyDes.triple_des(str(peer_common_key).ljust(24)).encrypt(message, padmode=2)
+
+		encbase64 = base64.b64encode(encrypted_message).decode()
 
 		enc_message = {
-		"encrypted_message": encrypted_message,
+		"encrypted_message": encbase64,
 		}
-		print(f"Encrypted message: {enc_message}")
+
+		print(f"Encrypted message: {encbase64}")
 		sock.send(json.dumps(enc_message).encode())
 		print(f"Encrypted message sent.")
 		sock.close()
@@ -114,7 +98,6 @@ def unsecure_chat(ip):
 	
 		print(f"Unencrypted message sent.")
 		save_log()
-
 
 	except socket.error as e:
 		print(f"Connection error: {e}")

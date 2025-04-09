@@ -1,8 +1,6 @@
 import socket
 import json
-from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-from cryptography.hazmat.primitives import hashes
+import pyDes
 import base64
 
 p = 19
@@ -11,24 +9,12 @@ g = 2
 def uncrypted_message(message):
     print(f"Unencrypted message: {message}")
 
-def fernet_key(key):
-    hkdf = HKDF(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=None,
-        info=None,
-    )
-    key_hkdf = hkdf.derive(str(key).encode()) 
-    fernet_key = base64.urlsafe_b64encode(key_hkdf)
-    return Fernet(fernet_key)
-
 def decrypte_message(encrypted_message, peer_public_key, private_nbr):
 
     try:
         peer_common_key = (peer_public_key ** int(private_nbr)) % p
         print(f"Peer common key: {peer_common_key}")
-        fernet = fernet_key(peer_common_key)
-        decrypted_message = fernet.decrypt(encrypted_message.encode()).decode()
+        decrypted_message = pyDes.triple_des(str(peer_common_key).ljust(24)).decrypt(encrypted_message, padmode=2).decode()
         print(f"Decrypted message: {decrypted_message}")
     except Exception as e:
         print(f"Error decrypting message: {e}")
@@ -75,18 +61,11 @@ def main():
                 data = conn.recv(1024).decode()
                 print(f"Message received data: {data}")
 
-                try:
-                    message = json.loads(data)
-
-                    if isinstance(message, str):
-                        message = json.loads(message)
-
-                except json.JSONDecodeError:
-                    print(f"Decoding failed.")
-                    return
+                message = json.loads(data)
 
                 if "peer_public_key" in locals() and "private_nbr" in locals():
-                    decrypte_message(message["encrypted_message"], peer_public_key, private_nbr)
+                    enc_message = base64.b64decode(message["encrypted_message"])
+                    decrypte_message(enc_message, peer_public_key, private_nbr)
 
             elif "unencrypted_message" in message:
                 uncrypted_message(message["unencrypted_message"])
