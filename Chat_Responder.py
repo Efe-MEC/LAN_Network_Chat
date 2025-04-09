@@ -30,6 +30,7 @@ def main():
     sock.bind(("", listening_port))
 
     while True:
+
         sock.listen(1)
         print(f"\nListening for incoming messages on port {listening_port}...")
         conn, addr = sock.accept()
@@ -75,9 +76,8 @@ def main():
 
         except json.JSONDecodeError:
             print(f"Error decoding JSON.")
-
-    conn.close()
-    print(f"Connection closed.")
+            conn.close()
+            print(f"Connection closed.")
 
 if __name__ == "__main__":
     main()
