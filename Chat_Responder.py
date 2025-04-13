@@ -6,6 +6,26 @@ import base64
 p = 19
 g = 2
 
+log_file = "logs.json"
+
+def save_log(op_type, message):
+
+	if os.path.exists(log_file):
+    	with open(log_file, "r") as f:
+        	logs = json.load(f)
+
+	time_now = time.time()
+
+	logs[time_now] = {
+		"op_type": op_type,
+		"message": message,
+	}
+
+	with open(log_file, "w") as f:
+        json.dump(logs, f, indent=4)
+
+	print(f"Log saved")
+
 def uncrypted_message(message):
     print(f"Unencrypted message: {message}")
 
@@ -48,6 +68,7 @@ def main():
                 message = json.loads(message)
 
             print(f"\nMessage received")
+            save_log("RECEIVED", message)
 
             if "key" in message:
                 peer_public_key = int(message["key"])
@@ -59,6 +80,7 @@ def main():
                 response_message = json.dumps({"key": enc_nbr})
                 conn.send(response_message.encode())
                 print(f"Public key sent: {enc_nbr}, waiting for message...")
+                save_log("SENT", response_message)
                 data = conn.recv(1024).decode()
                 print(f"Message received data: {data}")
 

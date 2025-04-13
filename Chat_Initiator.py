@@ -4,8 +4,10 @@ import os
 import time
 import pyDes
 import base64
+from datetime import datetime
 
 ip_file = "ips.json"
+log_file = "logs.json"
 
 p = 19
 g = 2
@@ -26,8 +28,23 @@ def load_users():
 			print(f"{data['name']} (Away)")
 
 
-def save_log():
-	print(f"Saving log...")
+def save_log(op_type, message):
+
+	if os.path.exists(log_file):
+    	with open(log_file, "r") as f:
+        	logs = json.load(f)
+
+	time_now = time.time()
+
+	logs[time_now] = {
+		"op_type": op_type,
+		"message": message,
+	}
+
+	with open(log_file, "w") as f:
+        json.dump(logs, f, indent=4)
+
+	print(f"Log saved")
 
 
 def secure_chat(ip):
@@ -48,10 +65,13 @@ def secure_chat(ip):
 		sock.send(json.dumps(message_key).encode())
 
 		print(f"My public key sent: {pub_nbr}, waiting for response key...")
+		save_log("SENT", message_key)
+
 		data = sock.recv(1024).decode()
 
 		peer_public_key = int(json.loads(data)["key"])
 		print(f"Peer public key received: {peer_public_key}")
+		save_log("RECEIVED", peer_public_key)
 		peer_common_key = (peer_public_key ** int(private_nbr)) % p
 		print(f"Peer common key calculated: {peer_common_key}")
 
@@ -68,10 +88,12 @@ def secure_chat(ip):
 		print(f"Encrypted message: {encbase64}")
 		sock.send(json.dumps(enc_message).encode())
 		print(f"Encrypted message sent.")
-		sock.close()
 
-		save_log()
-		
+		save_log("SENT", enc_message)
+
+		sock.close()
+		print(f"Connection closed.")
+
 
 	except socket.error as e:
 		print(f"Connection error: {e}")
@@ -97,7 +119,8 @@ def unsecure_chat(ip):
 		sock.close()
 	
 		print(f"Unencrypted message sent.")
-		save_log()
+
+		save_log("SENT", message)
 
 	except socket.error as e:
 		print(f"Connection error: {e}")
@@ -130,6 +153,25 @@ def load_chat():
 		print("Invalid chat type code. Enter 1 or 2.")
 
 
+def view_history():
+
+	if os.path.exists(log_file):
+    	with open(log_file, "r") as f:
+        	logs = json.load(f)
+
+		if logs:
+            for time_stamp, data in logs.items():
+                print(f"Operation Type: {data['op_type']}")
+                print(f"Message: {data['message']}")
+				dt_obj = datetime.fromtimestamp(float(time_stamp))
+				time_form = dt_obj.strftime("%Y-%m-%d %H:%M:%S") + f".{dt_object.microsecond // 1000:03d}"
+                print(f"Time: {time_form}")
+        else:
+            print("No logs found.")
+    else:
+        print("Log file does not exist.")
+
+
 def main ():
 
 	while True:
@@ -141,7 +183,7 @@ def main ():
 		elif op_code == "2":
 			load_chat()
 		elif op_code == "3":
-			print("History")
+			 view_history()
 		elif op_code == "4":
 			print("Exiting...")
 			break
