@@ -2,6 +2,8 @@ import socket
 import json
 import pyDes
 import base64
+import time
+import os
 
 p = 19
 g = 2
@@ -10,21 +12,23 @@ log_file = "logs.json"
 
 def save_log(op_type, message):
 
-	if os.path.exists(log_file):
-    	with open(log_file, "r") as f:
-        	logs = json.load(f)
+    if os.path.exists(log_file):
+        with open(log_file, "r") as f:
+            logs = json.load(f)
+    else:
+        logs = {}
 
-	time_now = time.time()
+    time_now = time.time()
 
-	logs[time_now] = {
-		"op_type": op_type,
-		"message": message,
+    logs[time_now] = {
+        "op_type": op_type,
+        "message": message,
 	}
 
-	with open(log_file, "w") as f:
+    with open(log_file, "w") as f:
         json.dump(logs, f, indent=4)
 
-	print(f"Log saved")
+    print(f"Log saved")
 
 def uncrypted_message(message):
     print(f"Unencrypted message: {message}")

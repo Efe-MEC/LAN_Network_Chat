@@ -31,8 +31,10 @@ def load_users():
 def save_log(op_type, message):
 
 	if os.path.exists(log_file):
-    	with open(log_file, "r") as f:
-        	logs = json.load(f)
+		with open(log_file, "r") as f:
+			logs = json.load(f)
+	else:
+		logs = {}
 
 	time_now = time.time()
 
@@ -42,9 +44,9 @@ def save_log(op_type, message):
 	}
 
 	with open(log_file, "w") as f:
-        json.dump(logs, f, indent=4)
+		json.dump(logs, f, indent=4)
 
-	print(f"Log saved")
+	print(f"Log saved.")
 
 
 def secure_chat(ip):
@@ -156,20 +158,20 @@ def load_chat():
 def view_history():
 
 	if os.path.exists(log_file):
-    	with open(log_file, "r") as f:
-        	logs = json.load(f)
+		with open(log_file, "r") as f:
+			logs = json.load(f)
 
 		if logs:
-            for time_stamp, data in logs.items():
-                print(f"Operation Type: {data['op_type']}")
-                print(f"Message: {data['message']}")
+			for time_stamp, data in logs.items():
+				print(f"Operation Type: {data['op_type']}")
+				print(f"Message: {data['message']}")
 				dt_obj = datetime.fromtimestamp(float(time_stamp))
-				time_form = dt_obj.strftime("%Y-%m-%d %H:%M:%S") + f".{dt_object.microsecond // 1000:03d}"
-                print(f"Time: {time_form}")
-        else:
-            print("No logs found.")
-    else:
-        print("Log file does not exist.")
+				time_form = dt_obj.strftime("%Y-%m-%d %H:%M:%S") + f":{dt_obj.microsecond // 1000:03d}"
+				print(f"Time: {time_form}")
+		else:
+			print("No logs found.")
+	else:
+		print("Log file does not exist.")
 
 
 def main ():
@@ -183,7 +185,7 @@ def main ():
 		elif op_code == "2":
 			load_chat()
 		elif op_code == "3":
-			 view_history()
+			view_history()
 		elif op_code == "4":
 			print("Exiting...")
 			break
