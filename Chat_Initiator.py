@@ -28,23 +28,20 @@ def load_users():
 			print(f"{data['name']} (Away)")
 
 
-def save_log(op_type, message):
-
-	if os.path.exists(log_file):
-		with open(log_file, "r") as f:
-			logs = json.load(f)
-	else:
-		logs = {}
+def save_log(op_type, chat_type, message, ip):
 
 	time_now = time.time()
 
-	logs[time_now] = {
+	logs = {
+		"time": time_now,
+		"ip": ip,
 		"op_type": op_type,
+		"chat_type": chat_type,
 		"message": message,
 	}
 
-	with open(log_file, "w") as f:
-		json.dump(logs, f, indent=4)
+	with open(log_file, "a") as f:
+		f.write(json.dumps(logs) + "\n")
 
 	print(f"Log saved.")
 
@@ -67,20 +64,21 @@ def secure_chat(ip):
 		sock.send(json.dumps(message_key).encode())
 
 		print(f"My public key sent: {pub_nbr}, waiting for response key...")
-		save_log("SENT", message_key)
+		save_log("SENT", "Secure", {"key": pub_nbr}, ip)
 
 		data = sock.recv(1024).decode()
 
 		peer_public_key = int(json.loads(data)["key"])
 		print(f"Peer public key received: {peer_public_key}")
-		save_log("RECEIVED", peer_public_key)
+
+		save_log("RECEIVED", "Secure", {"key": peer_public_key}, ip)
+
 		peer_common_key = (peer_public_key ** int(private_nbr)) % p
 		print(f"Peer common key calculated: {peer_common_key}")
 
 		message = input("Please enter your message:\n")
 
 		encrypted_message = pyDes.triple_des(str(peer_common_key).ljust(24)).encrypt(message, padmode=2)
-
 		encbase64 = base64.b64encode(encrypted_message).decode()
 
 		enc_message = {
@@ -91,7 +89,7 @@ def secure_chat(ip):
 		sock.send(json.dumps(enc_message).encode())
 		print(f"Encrypted message sent.")
 
-		save_log("SENT", enc_message)
+		save_log("SENT", "Secure", {"encrypted_message": encbase64}, ip)
 
 		sock.close()
 		print(f"Connection closed.")
@@ -122,7 +120,7 @@ def unsecure_chat(ip):
 	
 		print(f"Unencrypted message sent.")
 
-		save_log("SENT", message)
+		save_log("SENT", "Unsecure", {"unencrypted_message": message_input}, ip)
 
 	except socket.error as e:
 		print(f"Connection error: {e}")
@@ -159,15 +157,18 @@ def view_history():
 
 	if os.path.exists(log_file):
 		with open(log_file, "r") as f:
-			logs = json.load(f)
+			lines = f.readlines()
 
-		if logs:
-			for time_stamp, data in logs.items():
-				print(f"Operation Type: {data['op_type']}")
-				print(f"Message: {data['message']}")
-				dt_obj = datetime.fromtimestamp(float(time_stamp))
+		if lines:
+			for line in lines:
+				data = json.loads(line)
+				dt_obj = datetime.fromtimestamp(float(data["time"]))
 				time_form = dt_obj.strftime("%Y-%m-%d %H:%M:%S") + f":{dt_obj.microsecond // 1000:03d}"
 				print(f"Time: {time_form}")
+				print(f"IP Address: {data['ip']}")
+				print(f"Chat Type: {data['chat_type']}")
+				print(f"Operation Type: {data['op_type']}")
+				print(f"Message: {data['message']}\n")
 		else:
 			print("No logs found.")
 	else:

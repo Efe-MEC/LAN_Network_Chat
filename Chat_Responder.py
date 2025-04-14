@@ -3,32 +3,30 @@ import json
 import pyDes
 import base64
 import time
-import os
+
+listening_port = 6001
 
 p = 19
 g = 2
 
 log_file = "logs.json"
 
-def save_log(op_type, message):
-
-    if os.path.exists(log_file):
-        with open(log_file, "r") as f:
-            logs = json.load(f)
-    else:
-        logs = {}
+def save_log(op_type, chat_type, message, ip):
 
     time_now = time.time()
 
-    logs[time_now] = {
+    logs = {
+        "time": time_now,
+        "ip": ip,
         "op_type": op_type,
+        "chat_type": chat_type,
         "message": message,
-	}
+    }
 
-    with open(log_file, "w") as f:
-        json.dump(logs, f, indent=4)
+    with open(log_file, "a") as f:
+        f.write(json.dumps(logs) + "\n")
 
-    print(f"Log saved")
+    print(f"Log saved.")
 
 def uncrypted_message(message):
     print(f"Unencrypted message: {message}")
@@ -49,7 +47,6 @@ def response_key(private_nbr):
 def main():
     print("Welcome to the chat responder!")
 
-    listening_port = 6001
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind(("", listening_port))
 
@@ -72,9 +69,9 @@ def main():
                 message = json.loads(message)
 
             print(f"\nMessage received")
-            save_log("RECEIVED", message)
 
             if "key" in message:
+                save_log("RECEIVED", "Secure", {"key": message["key"]}, addr[0])
                 peer_public_key = int(message["key"])
                 print(f"Peer public key received: {peer_public_key}")
                 private_nbr = input("Please enter the encrypted key number (3 digit): ")
@@ -84,11 +81,15 @@ def main():
                 response_message = json.dumps({"key": enc_nbr})
                 conn.send(response_message.encode())
                 print(f"Public key sent: {enc_nbr}, waiting for message...")
-                save_log("SENT", response_message)
+
+                save_log("SENT", "Secure", {"key": enc_nbr}, addr[0])
+
                 data = conn.recv(1024).decode()
                 print(f"Message received data: {data}")
 
                 message = json.loads(data)
+
+                save_log("RECEIVED", "Secure", {"encrypted_message": message["encrypted_message"]}, addr[0])
 
                 if "peer_public_key" in locals() and "private_nbr" in locals():
                     enc_message = base64.b64decode(message["encrypted_message"])
@@ -96,9 +97,10 @@ def main():
 
             elif "unencrypted_message" in message:
                 uncrypted_message(message["unencrypted_message"])
+                save_log("RECEIVED", "Unsecure", {"unencrypted_message": message["unencrypted_message"]}, addr[0])
 
             else:
-                print(f"Unknown message format:", message)
+                print(f"Unknown message format: {message}")
 
         except json.JSONDecodeError:
             print(f"Error decoding JSON.")
