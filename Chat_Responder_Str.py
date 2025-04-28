@@ -12,6 +12,12 @@ g = 2
 
 log_file = "logs.json"
 
+def extend_to_8(data: bytes) -> bytes:
+	extra = 8 - (len(data) % 8)
+	if extra == 8:
+		return data
+	return data + b'\x00' * extra
+
 def save_log(op_type, chat_type, message, ip):
 
     time_now = time.time()
@@ -75,7 +81,7 @@ def main():
                 save_log("RECEIVED", "Secure", {"key": message["key"]}, addr[0])
                 peer_public_key = int(message["key"])
                 print(f"Peer public key received: {peer_public_key}")
-                private_nbr = random.randint(100, 999)
+                private_nbr = random.randint(1, 1000)
                 enc_nbr = response_key(private_nbr)
         
 
@@ -93,7 +99,8 @@ def main():
                 save_log("RECEIVED", "Secure", {"encrypted_message": message["encrypted_message"]}, addr[0])
 
                 if "peer_public_key" in locals() and "private_nbr" in locals():
-                    enc_message = base64.b64decode(message["encrypted_message"])
+                    enc_message = eval(message["encrypted_message"])
+                    extend_to_8(enc_message)
                     decrypte_message(enc_message, peer_public_key, private_nbr)
 
             elif "unencrypted_message" in message:

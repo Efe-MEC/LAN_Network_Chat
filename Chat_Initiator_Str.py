@@ -14,6 +14,12 @@ g = 2
 
 socket_number = 6001
 
+def extend_to_8(data: bytes) -> bytes:
+	extra = 8 - (len(data) % 8)
+	if extra == 8:
+		return data
+	return data + b'\x00' * extra
+
 def load_users():
 	if os.path.exists(ip_file):
 		with open(ip_file, "r") as f:
@@ -78,18 +84,19 @@ def secure_chat(ip):
 
 		message = input("Please enter your message:\n")
 
-		encrypted_message = pyDes.triple_des(str(peer_common_key).ljust(24)).encrypt(message, padmode=2)
-		encbase64 = base64.b64encode(encrypted_message).decode()
+		encrypted_message = (pyDes.triple_des(str(peer_common_key).ljust(24)).encrypt(message, padmode=2))
+		extend_to_8(encrypted_message)
+		encrypted_message = str(encrypted_message)
 
 		enc_message = {
-		"encrypted_message": encbase64,
+		"encrypted_message": (encrypted_message),
 		}
 
-		print(f"Encrypted message: {encbase64}")
+		print(f"Encrypted message: {encrypted_message}")
 		sock.send(json.dumps(enc_message).encode())
 		print(f"Encrypted message sent.")
 
-		save_log("SENT", "Secure", {"encrypted_message": encbase64}, ip)
+		save_log("SENT", "Secure", {"encrypted_message": encrypted_message}, ip)
 
 		sock.close()
 		print(f"Connection closed.")

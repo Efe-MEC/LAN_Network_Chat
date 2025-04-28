@@ -1,0 +1,17 @@
+{"time": 1744959013.9935532, "ip": "169.254.192.43", "op_type": "SENT", "chat_type": "Unsecure", "message": {"unencrypted_message": "Deneme"}}
+{"time": 1744959013.9939396, "ip": "169.254.192.43", "op_type": "RECEIVED", "chat_type": "Unsecure", "message": {"unencrypted_message": "Deneme"}}
+{"time": 1744959040.6776154, "ip": "169.254.192.43", "op_type": "SENT", "chat_type": "Secure", "message": {"key": 7}}
+{"time": 1744959040.6780958, "ip": "169.254.192.43", "op_type": "RECEIVED", "chat_type": "Secure", "message": {"key": 7}}
+{"time": 1744959046.0821414, "ip": "169.254.192.43", "op_type": "SENT", "chat_type": "Secure", "message": {"key": 5}}
+{"time": 1744959046.0822716, "ip": "169.254.192.43", "op_type": "RECEIVED", "chat_type": "Secure", "message": {"key": 5}}
+{"time": 1744959056.457217, "ip": "169.254.192.43", "op_type": "SENT", "chat_type": "Secure", "message": {"encrypted_message": "WMQ3Xk4IRCDvQ4bctlkZNQ=="}}
+{"time": 1744959056.457257, "ip": "169.254.192.43", "op_type": "RECEIVED", "chat_type": "Secure", "message": {"encrypted_message": "WMQ3Xk4IRCDvQ4bctlkZNQ=="}}
+{"time": 1744960835.359, "ip": "169.254.192.43", "op_type": "SENT", "chat_type": "Secure", "message": {"key": 7}}
+{"time": 1744960835.3595498, "ip": "169.254.192.43", "op_type": "RECEIVED", "chat_type": "Secure", "message": {"key": 7}}
+{"time": 1744960855.7292645, "ip": "169.254.192.43", "op_type": "SENT", "chat_type": "Secure", "message": {"key": 5}}
+{"time": 1744960855.729289, "ip": "169.254.192.43", "op_type": "RECEIVED", "chat_type": "Secure", "message": {"key": 5}}
+{"time": 1744960898.161697, "ip": "169.254.192.43", "op_type": "SENT", "chat_type": "Secure", "message": {"key": 17}}
+{"time": 1744960898.1620364, "ip": "169.254.192.43", "op_type": "RECEIVED", "chat_type": "Secure", "message": {"key": 17}}
+{"time": 1744960901.059289, "ip": "169.254.192.43", "op_type": "SENT", "chat_type": "Secure", "message": {"key": 14}}
+{"time": 1744960901.0593636, "ip": "169.254.192.43", "op_type": "RECEIVED", "chat_type": "Secure", "message": {"key": 14}}
+{"time": 1744960911.9668171, "ip": "169.254.192.43", "op_type": "RECEIVED", "chat_type": "Secure", "message": {"encrypted_message": "cDEGSPWcmGq3ZkQV8/+Jng=="}}
