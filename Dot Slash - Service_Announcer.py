@@ -7,7 +7,7 @@ user_name = input("Enter your username: ")
 my_ip = socket.gethostbyname(socket.gethostname())
 
 message_data = {
-    "name": user_name,
+    "username": user_name,
 }
 message_json = json.dumps(message_data)
 

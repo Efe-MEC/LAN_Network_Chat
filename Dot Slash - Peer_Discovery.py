@@ -24,7 +24,7 @@ while True:
     ip = addr[0]
     message = json.loads(data.decode())
     
-    name = message["name"]
+    name = message["username"]
     time_now = time.time()
     
     ips[ip] = {
