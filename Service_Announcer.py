@@ -11,7 +11,7 @@ message_data = {
 }
 message_json = json.dumps(message_data)
 
-broadcast_ip = '192.168.1.255'
+broadcast_ip = '25.255.255.255'
 broadcast_port = 6000
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
